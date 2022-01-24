@@ -2,6 +2,8 @@
 
 课程主页: [Missing-Semester](https://missing.csail.mit.edu/2020/)
 
+**主要还是用的时候查，学记不住**
+
 ##### lecture 1
 
 ```bash
@@ -162,3 +164,22 @@ program via the GNU findutils bug-reporting page at
 https://savannah.gnu.org/bugs/?group=findutils or, if
 you have no web access, by sending email to <bug-findutils@gnu.org>.
 ```
+
+##### lecture 2
+
+fish shell 函数
+
+```bash
+# 1.sh
+function test
+    echo $argv
+end
+# use $status to replace $?
+
+# shell
+chomd +x ./1.sh
+source ./1.sh
+test "hello world"
+```
+
+##### lecture 3

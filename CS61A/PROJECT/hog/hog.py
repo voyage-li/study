@@ -1,5 +1,6 @@
 """CS 61A Presents The Game of Hog."""
 
+from operator import add
 from dice import six_sided, four_sided, make_test_dice
 from ucb import main, trace, interact
 
@@ -21,6 +22,17 @@ def roll_dice(num_rolls, dice=six_sided):
     assert type(num_rolls) == int, 'num_rolls must be an integer.'
     assert num_rolls > 0, 'Must roll at least once.'
     # BEGIN PROBLEM 1
+    sum = 0
+    flag = 0
+    for i in range(num_rolls):
+        temp = dice()
+        if temp == 1:
+            flag = 1
+        else:
+            sum += temp
+    if flag == 1:
+        return flag
+    return sum
     "*** YOUR CODE HERE ***"
     # END PROBLEM 1
 
@@ -32,6 +44,7 @@ def free_bacon(score):
     """
     assert score < 100, 'The game should be over.'
     # BEGIN PROBLEM 2
+    return 10 - score % 10+score//10
     "*** YOUR CODE HERE ***"
     # END PROBLEM 2
 
@@ -50,6 +63,11 @@ def take_turn(num_rolls, opponent_score, dice=six_sided):
     assert num_rolls <= 10, 'Cannot roll more than 10 dice.'
     assert opponent_score < 100, 'The game should be over.'
     # BEGIN PROBLEM 3
+    if num_rolls == 0:
+        return free_bacon(opponent_score)
+    else:
+        return roll_dice(num_rolls, dice)
+
     "*** YOUR CODE HERE ***"
     # END PROBLEM 3
 
@@ -59,6 +77,10 @@ def is_swap(player_score, opponent_score):
     Return whether the two scores should be swapped
     """
     # BEGIN PROBLEM 4
+    if abs(player_score % 10-opponent_score % 10) == opponent_score//10 - opponent_score//100*10:
+        return True
+    else:
+        return False
     "*** YOUR CODE HERE ***"
     # END PROBLEM 4
 
@@ -99,6 +121,32 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
     """
     who = 0  # Who is about to take a turn, 0 (first) or 1 (second)
     # BEGIN PROBLEM 5
+    last_0 = 0
+    last_1 = 0
+    while True:
+        if who == 0:
+            roll = strategy0(score0, score1)
+            add_point = take_turn(roll, score1, dice)
+            score0 += add_point
+            if feral_hogs and abs(roll - last_0) == 2:
+                score0 += 3
+            last_0 = add_point
+            if is_swap(score0, score1):
+                score0, score1 = score1, score0
+            who = other(who)
+        else:
+            roll = strategy1(score1, score0)
+            add_point = take_turn(roll, score0, dice)
+            score1 += add_point
+            if feral_hogs and abs(roll - last_1) == 2:
+                score1 += 3
+            last_1 = add_point
+            if is_swap(score1, score0):
+                score0, score1 = score1, score0
+            who = other(who)
+        say = say(score0, score1)
+        if score0 >= goal or score1 >= goal:
+            break
     "*** YOUR CODE HERE ***"
     # END PROBLEM 5
     # (note that the indentation for the problem 6 prompt (***YOUR CODE HERE***) might be misleading)
@@ -117,6 +165,7 @@ def say_scores(score0, score1):
     """A commentary function that announces the score for each player."""
     print("Player 0 now has", score0, "and Player 1 now has", score1)
     return say_scores
+
 
 def announce_lead_changes(last_leader=None):
     """Return a commentary function that announces lead changes.
@@ -142,6 +191,7 @@ def announce_lead_changes(last_leader=None):
             print('Player', leader, 'takes the lead by', abs(score0 - score1))
         return announce_lead_changes(leader)
     return say
+
 
 def both(f, g):
     """Return a commentary function that says what f says, then what g says.
@@ -190,6 +240,15 @@ def announce_highest(who, last_score=0, running_high=0):
     assert who == 0 or who == 1, 'The who argument should indicate a player.'
     # BEGIN PROBLEM 7
     "*** YOUR CODE HERE ***"
+    # 看！
+    def say(*scores):
+        assert len(scores) == 2
+        gain = scores[who] - last_score
+        if gain > running_high:
+            print(gain, "point(s)! That's the biggest gain yet for Player", who)
+            return announce_highest(who, scores[who], gain)
+        return announce_highest(who, scores[who], running_high)
+    return say
     # END PROBLEM 7
 
 
@@ -284,7 +343,6 @@ def run_experiments():
         print('final_strategy win rate:', average_win_rate(final_strategy))
 
     "*** You may add additional experiments as you wish ***"
-
 
 
 def bacon_strategy(score, opponent_score, cutoff=8, num_rolls=6):

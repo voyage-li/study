@@ -1,4 +1,5 @@
-HW_SOURCE_FILE=__file__
+from operator import sub, mul
+HW_SOURCE_FILE = __file__
 
 
 def composer(func=lambda x: x):
@@ -21,6 +22,7 @@ def composer(func=lambda x: x):
     """
     def func_adder(g):
         "*** YOUR CODE HERE ***"
+        return composer(lambda x: func(g(x)))
     return func, func_adder
 
 
@@ -43,6 +45,11 @@ def g(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    if n <= 3:
+        return n
+    else:
+        return g(n-1)+2*g(n-2)+3*g(n-3)
+
 
 def g_iter(n):
     """Return the value of G(n), computed iteratively.
@@ -63,6 +70,15 @@ def g_iter(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    lis = [0 for i in range(1, n+2)]
+    iter = 1
+    while iter <= n:
+        if iter <= 3:
+            lis[iter] = iter
+        else:
+            lis[iter] = lis[iter-1]+2*lis[iter-2]+3*lis[iter-3]
+        iter += 1
+    return lis[n]
 
 
 def missing_digits(n):
@@ -93,6 +109,15 @@ def missing_digits(n):
     True
     """
     "*** YOUR CODE HERE ***"
+    def find(now, last):
+        if now == 0:
+            return 0
+        temp = now % 10
+        if last != temp:
+            return last-temp-1+find(now//10, temp)
+        else:
+            return find(now//10, temp)
+    return find(n, n % 10)
 
 
 def count_change(total):
@@ -112,11 +137,20 @@ def count_change(total):
     True
     """
     "*** YOUR CODE HERE ***"
+    def fun(now, coin):
+        if now == 0:
+            return 1
+        elif now < pow(2, coin):
+            return 0
+        else:
+            return fun(now, coin+1)+fun(now-pow(2, coin), coin)
+    return fun(total, 0)
 
 
 def print_move(origin, destination):
     """Print instructions to move a disk."""
     print("Move the top disk from rod", origin, "to rod", destination)
+
 
 def move_stack(n, start, end):
     """Print the moves required to move n disks on the start pole to the end
@@ -146,10 +180,24 @@ def move_stack(n, start, end):
     Move the top disk from rod 1 to rod 3
     """
     assert 1 <= start <= 3 and 1 <= end <= 3 and start != end, "Bad start/end"
+
+    def other(a, b):
+        if a != 1 and b != 1:
+            return 1
+        elif a != 2 and b != 2:
+            return 2
+        else:
+            return 3
+
+    another = other(start, end)
+    if n != 1:
+        move_stack(n-1, start, another)
+        print(f'Move the top disk from rod {start} to rod {end}')
+        move_stack(n-1, another, end)
+    else:
+        print(f'Move the top disk from rod {start} to rod {end}')
     "*** YOUR CODE HERE ***"
 
-
-from operator import sub, mul
 
 def make_anonymous_factorial():
     """Return the value of an expression that computes factorial.
@@ -161,5 +209,7 @@ def make_anonymous_factorial():
     >>> check(HW_SOURCE_FILE, 'make_anonymous_factorial', ['Assign', 'AugAssign', 'FunctionDef', 'Recursion'])
     True
     """
-    return 'YOUR_EXPRESSION_HERE'
-
+    # import math
+    # return math.factorial
+    from functools import reduce
+    return lambda n: reduce(mul, range(1, n + 1))

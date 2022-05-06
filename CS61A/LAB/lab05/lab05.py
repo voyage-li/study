@@ -1,3 +1,8 @@
+from operator import truediv
+from secrets import choice
+from time import sleep
+
+
 def coords(fn, seq, lower, upper):
     """
     >>> seq = [-4, -2, 0, 1, 3]
@@ -6,7 +11,8 @@ def coords(fn, seq, lower, upper):
     [[-2, 4], [1, 1], [3, 9]]
     """
     "*** YOUR CODE HERE ***"
-    return ______
+
+    return [[x, fn(x)] for x in seq if lower <= fn(x) <= upper]
 
 
 def riffle(deck):
@@ -19,7 +25,14 @@ def riffle(deck):
     [0, 10, 1, 11, 2, 12, 3, 13, 4, 14, 5, 15, 6, 16, 7, 17, 8, 18, 9, 19]
     """
     "*** YOUR CODE HERE ***"
-    return _______
+    l = len(deck)
+    lst = [0] * l
+    for i in range(0, l):
+        if i % 2 == 0:
+            lst[i] = deck[i//2]
+        else:
+            lst[i] = deck[l//2 + i//2]
+    return lst
 
 
 def berry_finder(t):
@@ -40,6 +53,16 @@ def berry_finder(t):
     True
     """
     "*** YOUR CODE HERE ***"
+    assert is_tree(t)
+    if label(t) == 'berry':
+        return True
+    elif not is_leaf(t):
+        for iter in branches(t):
+            if berry_finder(iter):
+                return True
+        return False
+    else:
+        return False
 
 
 def sprout_leaves(t, leaves):
@@ -76,8 +99,22 @@ def sprout_leaves(t, leaves):
           2
     """
     "*** YOUR CODE HERE ***"
+    assert is_tree(t)
+    if not is_leaf(t):
+        l = []
+        for i in branches(t):
+            l.append(sprout_leaves(i, leaves))
+        return tree(label(t), l)
+    else:
+        l = []
+        for i in leaves:
+            l.append(tree(i))
+        return tree(label(t), l)
+
 
 # Abstraction tests for sprout_leaves and berry_finder
+
+
 def check_abstraction():
     """
     There's nothing for you to do for this function, it's just here for the extra doctest
@@ -162,6 +199,26 @@ def add_trees(t1, t2):
       5
     """
     "*** YOUR CODE HERE ***"
+    assert is_tree(t1) and is_tree(t2)
+    bra1 = branches(t1)
+    bra2 = branches(t2)
+    l1 = len(bra1)
+    l2 = len(bra2)
+    i, j = 0, 0
+    l = []
+    while True:
+        if i >= l1 and j >= l2:
+            break
+        if i < l1 and j < l2:
+            l.append(add_trees(bra1[i], bra2[j]))
+            i, j = i+1, j+1
+        elif i < l1:
+            l.append(bra1[i])
+            i = i+1
+        else:
+            l.append(bra2[j])
+            j = j+1
+    return tree(label(t1)+label(t2), l)
 
 
 def build_successors_table(tokens):
@@ -183,9 +240,12 @@ def build_successors_table(tokens):
     for word in tokens:
         if prev not in table:
             "*** YOUR CODE HERE ***"
+            table[prev] = []
         "*** YOUR CODE HERE ***"
+        table[prev].append(word)
         prev = word
     return table
+
 
 def construct_sent(word, table):
     """Prints a random sentence starting with word, sampling from
@@ -201,7 +261,10 @@ def construct_sent(word, table):
     result = ''
     while word not in ['.', '!', '?']:
         "*** YOUR CODE HERE ***"
+        result += word+' '
+        word = random.choice(table[word])
     return result.strip() + word
+
 
 def shakespeare_tokens(path='shakespeare.txt', url='http://composingprograms.com/shakespeare.txt'):
     """Return the words of Shakespeare's plays as a list."""
@@ -217,10 +280,10 @@ def shakespeare_tokens(path='shakespeare.txt', url='http://composingprograms.com
 # tokens = shakespeare_tokens()
 # table = build_successors_table(tokens)
 
+
 def random_sent():
     import random
     return construct_sent(random.choice(table['.']), table)
-
 
 
 # Tree ADT
@@ -236,6 +299,7 @@ def tree(label, branches=[]):
             assert is_tree(branch), 'branches must be trees'
         return [label] + list(branches)
 
+
 def label(tree):
     """Return the label value of a tree."""
     if change_abstraction.changed:
@@ -243,12 +307,14 @@ def label(tree):
     else:
         return tree[0]
 
+
 def branches(tree):
     """Return the list of branches of the given tree."""
     if change_abstraction.changed:
         return tree['branches']
     else:
         return tree[1:]
+
 
 def is_tree(tree):
     """Returns True if the given tree is a tree, and False otherwise."""
@@ -267,14 +333,17 @@ def is_tree(tree):
                 return False
         return True
 
+
 def is_leaf(tree):
     """Returns True if the given tree's list of branches is empty, and False
     otherwise.
     """
     return not branches(tree)
 
+
 def change_abstraction(change):
     change_abstraction.changed = change
+
 
 change_abstraction.changed = False
 
@@ -302,6 +371,7 @@ def print_tree(t, indent=0):
     for b in branches(t):
         print_tree(b, indent + 1)
 
+
 def copy_tree(t):
     """Returns a copy of t. Only for testing purposes.
 
@@ -312,4 +382,3 @@ def copy_tree(t):
     5
     """
     return tree(label(t), [copy_tree(b) for b in branches(t)])
-

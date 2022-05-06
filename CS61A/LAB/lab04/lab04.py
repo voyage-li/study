@@ -1,3 +1,4 @@
+from math import sqrt
 LAB_SOURCE_FILE = __file__
 
 
@@ -11,6 +12,10 @@ def reverse_iter(lst):
     >>> print("Do not use lst[::-1], lst.reverse(), or reversed(lst)!") if any([r in cleaned for r in ["[::", ".reverse", "reversed"]]) else None
     """
     "*** YOUR CODE HERE ***"
+    l = len(lst)
+    for i in range(l//2):
+        lst[i], lst[l-1-i] = lst[l-1-i], lst[i]
+    return lst
 
 
 def reverse_recursive(lst):
@@ -23,9 +28,18 @@ def reverse_recursive(lst):
     >>> print("Do not use lst[::-1], lst.reverse(), or reversed(lst)!") if any([r in cleaned for r in ["[::", ".reverse", "reversed"]]) else None
     """
     "*** YOUR CODE HERE ***"
+    l = len(lst)
+
+    def help(n):
+        if n >= l//2:
+            return
+        else:
+            lst[n], lst[l-1-n] = lst[l-1-n], lst[n]
+            help(n+1)
+    help(0)
+    return lst
 
 
-from math import sqrt
 def distance(city_a, city_b):
     """
     >>> city_a = make_city('city_a', 0, 1)
@@ -38,6 +52,10 @@ def distance(city_a, city_b):
     5.0
     """
     "*** YOUR CODE HERE ***"
+    dx = get_lat(city_a)-get_lat(city_b)
+    dy = get_lon(city_a)-get_lon(city_b)
+    return sqrt(dx**2+dy**2)
+
 
 def closer_city(lat, lon, city_a, city_b):
     """
@@ -54,6 +72,14 @@ def closer_city(lat, lon, city_a, city_b):
     'Bucharest'
     """
     "*** YOUR CODE HERE ***"
+    temp = make_city('temp', lat, lon)
+    rs1 = distance(temp, city_a)
+    rs2 = distance(temp, city_b)
+    if rs1 < rs2:
+        return get_name(city_a)
+    else:
+        return get_name(city_b)
+
 
 def check_abstraction():
     """
@@ -92,9 +118,10 @@ def make_city(name, lat, lon):
     1
     """
     if change_abstraction.changed:
-        return {"name" : name, "lat" : lat, "lon" : lon}
+        return {"name": name, "lat": lat, "lon": lon}
     else:
         return [name, lat, lon]
+
 
 def get_name(city):
     """
@@ -107,6 +134,7 @@ def get_name(city):
     else:
         return city[0]
 
+
 def get_lat(city):
     """
     >>> city = make_city('Berkeley', 0, 1)
@@ -117,6 +145,7 @@ def get_lat(city):
         return city["lat"]
     else:
         return city[1]
+
 
 def get_lon(city):
     """
@@ -129,8 +158,10 @@ def get_lon(city):
     else:
         return city[2]
 
+
 def change_abstraction(change):
     change_abstraction.changed = change
+
 
 change_abstraction.changed = False
 
@@ -162,4 +193,20 @@ def add_chars(w1, w2):
     True
     """
     "*** YOUR CODE HERE ***"
+    l1 = len(w1)
+    l2 = len(w2)
+    ans = ''
 
+    def fun(i, j, now):
+        if i >= l1 and j >= l2:
+            return now
+        elif i >= l1 and j < l2:
+            now += w2[j]
+            return fun(i, j+1, now)
+        else:
+            if w1[i] == w2[j]:
+                return fun(i+1, j+1, now)
+            else:
+                now += w2[j]
+                return fun(i, j+1, now)
+    return fun(0, 0, ans)

@@ -2,9 +2,7 @@
 !*.*
 !*/
 !ok
-.ok_storage.dir
-.ok_storage.dat
-.ok_storage.bat
+.*
 .vscode/
 **/__pycache__/**
 

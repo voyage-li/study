@@ -10,10 +10,10 @@
 
 - 使用 ok
   ```bash
-  python3 ok
+  python3 ok --loca
   ```
   先答题
   ```bash
-  python3 ok -u
+  python3 ok -u --local
   ```
   奇技淫巧:直接修改所有 lock 为 false

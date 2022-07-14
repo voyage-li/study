@@ -7,7 +7,10 @@ def insert_into_all(item, nested_list):
     >>> insert_into_all(0, nl)
     [[0], [0, 1, 2], [0, 3]]
     """
-    return ______________________________
+    for x in nested_list:
+        x.insert(0, item)
+    return nested_list
+
 
 def subseqs(s):
     """Assuming that S is a list, return a nested list of all subsequences
@@ -19,11 +22,24 @@ def subseqs(s):
     >>> subseqs([])
     [[]]
     """
-    if ________________:
-        ________________
+    # 我的阴间方法 但就是不是很符合题目要求
+    # if s == [[]]:
+    #     return s
+    # else:
+    #     l = len(s)
+    #     ans = []
+    #     for x in range(0, 1 << l):
+    #         temp = []
+    #         for y in range(0, l):
+    #             if (x >> y) & 1 == 1:
+    #                 temp.append(s[y])
+    #         ans.append(temp)
+    #     return ans
+    if not s:
+        return [[]]
     else:
-        ________________
-        ________________
+        temp = subseqs(s[1:])
+        return temp + insert_into_all(s[0], temp)
 
 
 def inc_subseqs(s):
@@ -40,16 +56,17 @@ def inc_subseqs(s):
     >>> sorted(seqs2)
     [[], [1], [1], [1, 1], [1, 1, 2], [1, 2], [1, 2], [2]]
     """
+    # else后面是如果前驱比当前小 则可以选择带不带前驱，然后将两种合并
     def subseq_helper(s, prev):
         if not s:
-            return ____________________
+            return [[]]
         elif s[0] < prev:
-            return ____________________
+            return subseq_helper(s[1:], prev)
         else:
-            a = ______________________
-            b = ______________________
-            return insert_into_all(________, ______________) + ________________
-    return subseq_helper(____, ____)
+            a = subseq_helper(s[1:], prev)
+            b = subseq_helper(s[1:], s[0])
+            return insert_into_all(s[0], b) + a
+    return subseq_helper(s, -1)
 
 
 def trade(first, second):
@@ -81,9 +98,9 @@ def trade(first, second):
     """
     m, n = 1, 1
 
-    equal_prefix = lambda: ______________________
-    while _______________________________:
-        if __________________:
+    def equal_prefix(): return sum(first[:m]) == sum(second[:n])
+    while m <= len(first) and n <= len(second) and not equal_prefix():
+        if sum(first[:m]) < sum(second[:n]):
             m += 1
         else:
             n += 1
@@ -108,6 +125,9 @@ def reverse(lst):
     [-8, 72, 42]
     """
     "*** YOUR CODE HERE ***"
+    l = len(lst)
+    for x in range(0, l//2):
+        lst[x], lst[l-1-x] = lst[l-1-x], lst[x]
 
 
 cs61a = {
@@ -122,6 +142,7 @@ cs61a = {
     "Extra credit": 0
 }
 
+
 def make_glookup(class_assignments):
     """ Returns a function which calculates and returns the current
     grade out of what assignments have been entered so far.
@@ -135,6 +156,22 @@ def make_glookup(class_assignments):
     0.8913043478260869
     """
     "*** YOUR CODE HERE ***"
+
+    temp = class_assignments
+    data = []
+
+    def func(str, point):
+        nonlocal temp
+        nonlocal data
+        data.append([point, temp[str]])
+        ans1 = 0
+        ans2 = 0
+        for x in data:
+            ans1 += x[0]
+            ans2 += x[1]
+        return ans1/ans2
+
+    return func
 
 
 def num_trees(n):
@@ -157,9 +194,10 @@ def num_trees(n):
     429
 
     """
-    if ____________________:
-        return _______________
-    return _______________
+    if n == 1 or n == 2:
+        return 1
+    return num_trees(n-1)*2*(2*n-3)//n
+    # 我不理解
 
 
 def make_advanced_counter_maker():
@@ -191,13 +229,25 @@ def make_advanced_counter_maker():
     >>> tom_counter('global-count')
     1
     """
-    ________________
-    def ____________(__________):
-        ________________
-        def ____________(__________):
-            ________________
+    count_g = 0
+
+    def rec():
+        count_l = 0
+
+        def fre(string):
+            nonlocal count_g, count_l
             "*** YOUR CODE HERE ***"
             # as many lines as you want
-        ________________
-    ________________
+            if string == "global-count":
+                count_g += 1
+                return count_g
+            elif string == "count":
+                count_l += 1
+                return count_l
+            elif string == "global-reset":
+                count_g = 0
+            elif string == "reset":
+                count_l = 0
 
+        return fre
+    return rec

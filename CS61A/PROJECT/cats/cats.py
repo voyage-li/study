@@ -17,6 +17,13 @@ def choose(paragraphs, select, k):
     """
     # BEGIN PROBLEM 1
     "*** YOUR CODE HERE ***"
+    for x in paragraphs:
+        if select(x):
+            k = k-1
+        if k == -1:
+            return x
+
+    return ''
     # END PROBLEM 1
 
 
@@ -33,6 +40,14 @@ def about(topic):
     assert all([lower(x) == x for x in topic]), 'topics should be lowercase.'
     # BEGIN PROBLEM 2
     "*** YOUR CODE HERE ***"
+    def judge(x):
+        x = remove_punctuation(x)
+        nonlocal topic
+        for data in topic:
+            if data in x.lower().split(' '):
+                return True
+        return False
+    return judge
     # END PROBLEM 2
 
 
@@ -57,6 +72,16 @@ def accuracy(typed, reference):
     reference_words = split(reference)
     # BEGIN PROBLEM 3
     "*** YOUR CODE HERE ***"
+    if len(typed_words) == 0:
+        return 0.0
+    l1, l2 = 0, 0
+    true_type = 0
+    while l1 < len(typed_words) and l2 < len(reference_words):
+        if typed_words[l1] == reference_words[l2]:
+            true_type += 1
+        l1 += 1
+        l2 += 1
+    return (true_type/len(typed_words)*100)
     # END PROBLEM 3
 
 
@@ -65,6 +90,7 @@ def wpm(typed, elapsed):
     assert elapsed > 0, 'Elapsed time must be positive'
     # BEGIN PROBLEM 4
     "*** YOUR CODE HERE ***"
+    return len(typed)*12/elapsed
     # END PROBLEM 4
 
 
@@ -75,6 +101,13 @@ def autocorrect(user_word, valid_words, diff_function, limit):
     """
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
+    if user_word in valid_words:
+        return user_word
+    similar_word = min(valid_words, key=lambda w: diff_function(user_word, w, limit))
+    if diff_function(user_word, similar_word, limit) > limit:
+        return user_word
+    else:
+        return similar_word
     # END PROBLEM 5
 
 
@@ -84,7 +117,25 @@ def shifty_shifts(start, goal, limit):
     their lengths.
     """
     # BEGIN PROBLEM 6
-    assert False, 'Remove this line'
+
+    # dp做法 dp[i][j]来表示str1在i位置之前和str2在j位置之前字符的最小变换次数 状态转移方程:
+    #  str1[i] == str2[j]
+    #       dp[i][j] = dp[i-1][j-1]
+    #
+    #  str1[i] != str2[j]
+    #       dp[i][j] = min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]) + 1
+
+    if len(start) == 0:
+        return len(goal)
+    if len(goal) == 0:
+        return len(start)
+    if start[0] != goal[0]:
+        if limit == 0:
+            return 1
+        else:
+            return 1 + shifty_shifts(start[1:], goal[1:], limit-1)
+    else:
+        return shifty_shifts(start[1:], goal[1:], limit)
     # END PROBLEM 6
 
 
@@ -92,20 +143,20 @@ def meowstake_matches(start, goal, limit):
     """A diff function that computes the edit distance from START to GOAL."""
     assert False, 'Remove this line'
 
-    if ______________: # Fill in the condition
+    if ______________:  # Fill in the condition
         # BEGIN
         "*** YOUR CODE HERE ***"
         # END
 
-    elif ___________: # Feel free to remove or add additional cases
+    elif ___________:  # Feel free to remove or add additional cases
         # BEGIN
         "*** YOUR CODE HERE ***"
         # END
 
     else:
         add_diff = ...  # Fill in these lines
-        remove_diff = ... 
-        substitute_diff = ... 
+        remove_diff = ...
+        substitute_diff = ...
         # BEGIN
         "*** YOUR CODE HERE ***"
         # END
@@ -205,6 +256,7 @@ def game_string(game):
     """A helper function that takes in a game object and returns a string representation of it"""
     return "game(%s, %s)" % (game[0], game[1])
 
+
 enable_multiplayer = False  # Change to True when you
 
 ##########################
@@ -212,26 +264,31 @@ enable_multiplayer = False  # Change to True when you
 ##########################
 
 key_distance = get_key_distances()
+
+
 def key_distance_diff(start, goal, limit):
     """ A diff function that takes into account the distances between keys when
     computing the difference score."""
 
-    start = start.lower() #converts the string to lowercase
-    goal = goal.lower() #converts the string to lowercase
+    start = start.lower()  # converts the string to lowercase
+    goal = goal.lower()  # converts the string to lowercase
 
     # BEGIN PROBLEM EC1
     "*** YOUR CODE HERE ***"
     # END PROBLEM EC1
 
+
 def memo(f):
     """A memoization function as seen in John Denero's lecture on Growth"""
 
     cache = {}
+
     def memoized(*args):
         if args not in cache:
             cache[args] = f(*args)
         return cache[args]
     return memoized
+
 
 key_distance_diff = count(key_distance_diff)
 
@@ -252,7 +309,7 @@ def faster_autocorrect(user_word, valid_words, diff_function, limit):
 def run_typing_test(topics):
     """Measure typing speed and accuracy on the command line."""
     paragraphs = lines_from_file('data/sample_paragraphs.txt')
-    select = lambda p: True
+    def select(p): return True
     if topics:
         select = about(topics)
     i = 0

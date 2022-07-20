@@ -117,14 +117,6 @@ def shifty_shifts(start, goal, limit):
     their lengths.
     """
     # BEGIN PROBLEM 6
-
-    # dp做法 dp[i][j]来表示str1在i位置之前和str2在j位置之前字符的最小变换次数 状态转移方程:
-    #  str1[i] == str2[j]
-    #       dp[i][j] = dp[i-1][j-1]
-    #
-    #  str1[i] != str2[j]
-    #       dp[i][j] = min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]) + 1
-
     if len(start) == 0:
         return len(goal)
     if len(goal) == 0:
@@ -141,25 +133,33 @@ def shifty_shifts(start, goal, limit):
 
 def meowstake_matches(start, goal, limit):
     """A diff function that computes the edit distance from START to GOAL."""
-    assert False, 'Remove this line'
 
-    if ______________:  # Fill in the condition
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+    # dp做法 dp[i][j]来表示str1在i位置之前和str2在j位置之前字符的最小变换次数 状态转移方程:
+    #  str1[i] == str2[j]
+    #       dp[i][j] = dp[i-1][j-1]
+    #
+    #  str1[i] != str2[j]
+    #       dp[i][j] = min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]) + 1
+    l1 = len(start)
+    l2 = len(goal)
+    dp = [[0 for _ in range(l2+1)] for _ in range(l1+1)]
 
-    elif ___________:  # Feel free to remove or add additional cases
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+    start = "#" + start
+    goal = "#" + goal
 
-    else:
-        add_diff = ...  # Fill in these lines
-        remove_diff = ...
-        substitute_diff = ...
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+    for i in range(l2+1):
+        dp[0][i] = i
+    for i in range(l1+1):
+        dp[i][0] = i
+
+    for i in range(1, l1+1):
+        for j in range(1, l2+1):
+            if start[i] == goal[j]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = min(dp[i-1][j-1], dp[i][j-1], dp[i-1][j]) + 1
+
+    return dp[l1][l2]
 
 
 def final_diff(start, goal, limit):
@@ -177,6 +177,19 @@ def report_progress(typed, prompt, id, send):
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
     # END PROBLEM 8
+    lenth = len(prompt)
+    ans = 0
+    for i in range(lenth):
+        if i >= len(typed):
+            break
+        elif typed[i] == prompt[i]:
+            ans += 1
+        else:
+            break
+
+    progress = ans/lenth
+    send({'id': id, 'progress': progress})
+    return progress
 
 
 def fastest_words_report(times_per_player, words):
@@ -202,6 +215,14 @@ def time_per_word(times_per_player, words):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    # 刚开始没有理解题目意思
+    tpp = []
+    for player in times_per_player:
+        time = []
+        for i in range(len(player) - 1):
+            time.append(player[i + 1] - player[i])
+        tpp.append(time)
+    return game(words, tpp)
     # END PROBLEM 9
 
 
@@ -217,6 +238,15 @@ def fastest_words(game):
     words = range(len(all_words(game)))    # An index for each word
     # BEGIN PROBLEM 10
     "*** YOUR CODE HERE ***"
+    ans = [[] for _ in players]
+    for i in words:
+        min_num, min_loc = 999, -1
+        for j in players:
+            if time(game, j, i) < min_num:
+                min_num, min_loc = time(game, j, i), j
+        ans[min_loc].append(word_at(game, i))
+    return ans
+
     # END PROBLEM 10
 
 
@@ -275,6 +305,18 @@ def key_distance_diff(start, goal, limit):
 
     # BEGIN PROBLEM EC1
     "*** YOUR CODE HERE ***"
+    if limit < 0:
+        return float('inf')
+    if len(start) == 0 or len(goal) == 0:
+        return len(start) + len(goal)
+    elif start[0] == goal[0]:
+        return key_distance_diff(start[1:], goal[1:], limit)
+    else:
+        add_diff = 1 + key_distance_diff(start, goal[1:], limit - 1)
+        remove_diff = 1 + key_distance_diff(start[1:], goal, limit - 1)
+        kd = key_distance[(start[0], goal[0])]
+        substitute_diff = kd + key_distance_diff(start[1:], goal[1:], limit - 1)
+        return min(min(add_diff, remove_diff), substitute_diff)
     # END PROBLEM EC1
 
 
@@ -283,10 +325,10 @@ def memo(f):
 
     cache = {}
 
-    def memoized(*args):
-        if args not in cache:
-            cache[args] = f(*args)
-        return cache[args]
+    def memoized(user_word, w, limit):
+        if user_word+w not in cache:
+            cache[user_word+w] = f(user_word, w, limit)
+        return cache[user_word+w]
     return memoized
 
 
@@ -298,6 +340,17 @@ def faster_autocorrect(user_word, valid_words, diff_function, limit):
 
     # BEGIN PROBLEM EC2
     "*** YOUR CODE HERE ***"
+    # 大概就是记忆化搜索
+    diff = memo(diff_function)
+
+    if user_word in valid_words:
+        return user_word
+    similar_word = min(valid_words, key=lambda w: diff(user_word, w, limit))
+    if diff(user_word, similar_word, limit) > limit:
+        return user_word
+    else:
+        return similar_word
+
     # END PROBLEM EC2
 
 
